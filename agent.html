@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>CITY LEGACY BANK — Agent Portal</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,Segoe UI,sans-serif;background:#f3f4f6;color:#1f2937;min-height:100vh}
+.hidden{display:none!important}
+
+/* Login */
+.ag-login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;background:linear-gradient(135deg,#1e293b,#334155,#475569)}
+.ag-card{background:#fff;border-radius:14px;padding:36px 32px;width:100%;max-width:400px;box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.ag-logo{text-align:center;font-weight:800;color:#1e40af;margin-bottom:10px;font-size:1.05rem}
+.ag-card h1{font-size:1.35rem;margin:0 0 4px;text-align:center}
+.ag-card .sub{text-align:center;color:#6b7280;font-size:.88rem;margin-bottom:22px}
+.ag-fg{margin-bottom:14px}
+.ag-fg label{display:block;font-size:.82rem;font-weight:600;margin-bottom:5px;color:#374151}
+.ag-fg input,.ag-fg select{width:100%;padding:11px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:.95rem;font-family:inherit}
+.ag-fg input:focus{outline:none;border-color:#1e40af;box-shadow:0 0 0 3px rgba(30,64,175,.12)}
+.ag-btn{width:100%;padding:12px;border:none;border-radius:8px;background:#1e40af;color:#fff;font-weight:700;font-size:.95rem;cursor:pointer}
+.ag-btn:hover{background:#1e3a8a}
+.ag-btn:disabled{opacity:.6;cursor:not-allowed}
+.ag-hint{text-align:center;margin-top:14px;font-size:.8rem;color:#9ca3af}
+.ag-hint a{color:#1e40af;font-weight:600;text-decoration:none}
+.ag-err{color:#b91c1c;font-size:.85rem;margin-top:8px;display:none}
+
+/* Dashboard */
+.ag-dash{min-height:100vh}
+.ag-top{background:#1e293b;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.ag-top h2{font-size:1.05rem;margin:0;font-weight:700}
+.ag-top .meta{font-size:.8rem;color:#94a3b8}
+.ag-body{max-width:960px;margin:0 auto;padding:18px 16px 40px}
+.ag-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+@media(max-width:600px){.ag-stats{grid-template-columns:1fr}}
+.ag-sc{background:#fff;border-radius:10px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.ag-sc .v{font-size:1.25rem;font-weight:800}
+.ag-sc .l{font-size:.78rem;color:#6b7280;margin-top:2px}
+.ag-panel{background:#fff;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;overflow:hidden}
+.ag-panel-h{padding:12px 16px;border-bottom:1px solid #e5e7eb;display:flex;justify-content:space-between;align-items:center;font-weight:700;font-size:.95rem;gap:8px;flex-wrap:wrap}
+.ag-panel-b{padding:14px 16px}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th{text-align:left;padding:10px 12px;background:#f9fafb;color:#6b7280;font-size:.72rem;text-transform:uppercase}
+td{padding:10px 12px;border-top:1px solid #f3f4f6;vertical-align:middle}
+.ag-sm{padding:7px 11px;font-size:.8rem;border-radius:7px;border:none;font-weight:600;cursor:pointer}
+.ag-ok{background:#057a55;color:#fff}
+.ag-pri{background:#1e40af;color:#fff}
+.ag-muted{background:#f3f4f6;color:#4b5563}
+.ag-warn{color:#b45309;font-size:.82rem}
+.ag-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:560px){.ag-form-row{grid-template-columns:1fr}}
+.ag-form-row .ag-fg{margin-bottom:10px}
+.toast{position:fixed;bottom:20px;right:20px;background:#111827;color:#fff;padding:12px 18px;border-radius:10px;z-index:50;font-size:.9rem;max-width:320px;display:none}
+.toast.show{display:block}
+.toast.ok{background:#057a55}
+.toast.err{background:#b91c1c}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="agLoginWrap" class="ag-login-wrap">
+  <div class="ag-card">
+    <div class="ag-logo">CITY LEGACY BANK</div>
+    <h1>Agent Portal</h1>
+    <p class="sub">Authorized agents only</p>
+    <form id="agLoginForm">
+      <div class="ag-fg"><label>Username</label><input id="agLoginUser" autocomplete="username" required/></div>
+      <div class="ag-fg"><label>Password</label><input type="password" id="agLoginPass" autocomplete="current-password" required/></div>
+      <button type="submit" class="ag-btn" id="agLoginBtn">Sign In</button>
+      <div class="ag-err" id="agLoginErr"></div>
+    </form>
+    <p class="ag-hint"><a id="backHome" href="city-legacy-bank-frontend.html">← Back to website</a></p>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="agDash" class="ag-dash hidden">
+  <div class="ag-top">
+    <div>
+      <h2>Agent Dashboard</h2>
+      <div class="meta" id="agGreet">—</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button type="button" class="ag-sm ag-muted" id="btnRefresh">Refresh</button>
+      <button type="button" class="ag-sm ag-muted" id="btnLogout">Log out</button>
+    </div>
+  </div>
+  <div class="ag-body">
+    <div class="ag-stats">
+      <div class="ag-sc"><div class="v" id="agBal">$0.00</div><div class="l">Your float balance</div></div>
+      <div class="ag-sc"><div class="v" id="agCount">0 / 3</div><div class="l">Customers created</div></div>
+      <div class="ag-sc"><div class="v" id="agStatus">Active</div><div class="l">Account status</div></div>
+    </div>
+
+    <div class="ag-panel" id="agCreatePanel">
+      <div class="ag-panel-h" id="agCreateTitle">Create customer <span style="font-weight:500;font-size:.8rem;color:#6b7280">(uses 1 slot)</span></div>
+      <div class="ag-panel-b">
+        <div class="ag-form-row">
+          <div class="ag-fg"><label>Full name *</label><input id="agcName"/></div>
+          <div class="ag-fg"><label>Email *</label><input type="email" id="agcEmail"/></div>
+        </div>
+        <div class="ag-form-row">
+          <div class="ag-fg"><label>Phone</label><input id="agcPhone"/></div>
+          <div class="ag-fg"><label>Username *</label><input id="agcUser"/></div>
+        </div>
+        <div class="ag-form-row">
+          <div class="ag-fg"><label>Password *</label><input id="agcPass"/></div>
+          <div class="ag-fg"><label>Initial funding from your float ($)</label><input type="number" id="agcFund" min="0" step="0.01" value="0"/></div>
+        </div>
+        <p style="font-size:.8rem;color:#6b7280;margin:0 0 10px">Account number and routing number are generated automatically. Only Master Admin controls numbering policy.</p>
+        <button type="button" class="ag-btn ag-pri" style="width:auto;padding:10px 18px" id="btnCreate">Create customer</button>
+        <div class="ag-err" id="agcErr"></div>
+      </div>
+    </div>
+
+    <div class="ag-panel">
+      <div class="ag-panel-h">My customers</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead><tr><th>Account</th><th>Name</th><th>Balance</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="agCustBody"><tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:24px">No customers yet</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ag-panel">
+      <div class="ag-panel-h">Mail — my customers only</div>
+      <div class="ag-panel-b">
+        <div class="ag-form-row">
+          <div class="ag-fg"><label>To customer</label>
+            <select id="agMailTo"><option value="">Select…</option></select>
+          </div>
+          <div class="ag-fg"><label>Subject</label><input id="agMailSubj" placeholder="Subject"/></div>
+        </div>
+        <div class="ag-fg"><label>Message</label><textarea id="agMailBody" rows="3" style="width:100%;padding:11px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-family:inherit;font-size:.95rem;resize:vertical"></textarea></div>
+        <button type="button" class="ag-btn ag-pri" style="width:auto;padding:10px 18px;margin-top:8px" id="btnMailSend">Send to customer</button>
+        <div class="ag-err" id="agMailErr"></div>
+        <div id="agMailList" style="margin-top:16px;border-top:1px solid #e5e7eb;padding-top:12px;max-height:280px;overflow:auto;font-size:.88rem"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(function(){
+  var AGENT_KEY = 'clb_session_agent';
+  var BIN_ID = '6a692d88da38895dfe9d6e47';
+  var MASTER_KEY = '$2a$10$z.vqmHEHF.VAnK47QchAmepRKmJkTbF.rrhWPcIfnCa1VTtG9hkNi';
+  var ACCESS_KEY = '$2a$10$RWBtyytHczMs7JJOOQAsS.g2d5x87/gLJmstVsmyHAAcgB/lNtD5a';
+  var BIN_URL = 'https://api.jsonbin.io/v3/b/' + BIN_ID;
+
+  function $(id){ return document.getElementById(id); }
+  function money(n){
+    return (Math.round((n||0)*100)/100).toLocaleString('en-US',{style:'currency',currency:'USD'});
+  }
+  function gid(p){ return p + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+  function gacc(){ return 'ACC-' + (100000 + Math.floor(Math.random()*900000)); }
+  function groute(){
+    var d=''; for(var i=0;i<8;i++) d += Math.floor(Math.random()*10);
+    var w=[3,7,1,3,7,1,3,7], sum=0;
+    for(var i=0;i<8;i++) sum += w[i]*parseInt(d[i],10);
+    return d + ((10-(sum%10))%10);
+  }
+  function gpwd(){
+    var U='ABCDEFGHJKLMNPQRSTUVWXYZ',L='abcdefghjkmnpqrstuvwxyz',D='23456789',Sy='!@#$%&*';
+    var p=U[Math.random()*U.length|0]+L[Math.random()*L.length|0]+D[Math.random()*D.length|0]+Sy[Math.random()*Sy.length|0];
+    var a=U+L+D+Sy;
+    while(p.length<10) p+=a[Math.random()*a.length|0];
+    return p.split('').sort(function(){return Math.random()-0.5;}).join('');
+  }
+  function toast(m, ok){
+    var el=$('toast'); el.textContent=m; el.className='toast show '+(ok===false?'err':'ok');
+    setTimeout(function(){ el.classList.remove('show'); }, 3200);
+  }
+
+  async function loadBin(){
+    var r=await fetch(BIN_URL+'/latest',{headers:{'X-Master-Key':MASTER_KEY,'X-Access-Key':ACCESS_KEY}});
+    if(!r.ok) throw new Error('Cloud error '+r.status);
+    var j=await r.json(); return j.record||j;
+  }
+  async function saveBin(data){
+    data.meta=data.meta||{};
+    data.meta.updatedAt=new Date().toISOString();
+    data.meta.bankName='CITY LEGACY BANK';
+    var r=await fetch(BIN_URL,{method:'PUT',headers:{'Content-Type':'application/json','X-Master-Key':MASTER_KEY},body:JSON.stringify(data)});
+    if(!r.ok) throw new Error('Save failed '+r.status);
+    return true;
+  }
+
+  function setAgent(a){ try{sessionStorage.setItem(AGENT_KEY,JSON.stringify(a));}catch(e){} window.__clbAgent=a; }
+  function getAgent(){
+    if(window.__clbAgent) return window.__clbAgent;
+    try{ var raw=sessionStorage.getItem(AGENT_KEY); if(raw){ window.__clbAgent=JSON.parse(raw); return window.__clbAgent; } }catch(e){}
+    return null;
+  }
+  function clearAgent(){ window.__clbAgent=null; try{sessionStorage.removeItem(AGENT_KEY);}catch(e){} }
+
+  function showDash(on){
+    if(on){ $('agLoginWrap').classList.add('hidden'); $('agDash').classList.remove('hidden'); }
+    else { $('agDash').classList.add('hidden'); $('agLoginWrap').classList.remove('hidden'); }
+  }
+
+  function render(data, agent){
+    if(!agent) return;
+    var live=(data.agents||[]).find(function(a){return a.id===agent.id;})||agent;
+    setAgent(live);
+    $('agGreet').textContent=live.name+' · @'+(live.username||'');
+    $('agBal').textContent=money(live.balance);
+    var mine=(data.customers||[]).filter(function(c){return c.createdBy===live.id;});
+    var lim=live.customerLimit||3;
+    $('agCount').textContent=mine.length+' / '+lim;
+    var st=live.status==='suspended'?'Suspended':(live.restriction?'Restricted':'Active');
+    $('agStatus').textContent=st;
+
+        var body=$('agCustBody');
+    if(!mine.length){
+      body.innerHTML='<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:24px">No customers yet</td></tr>';
+    } else {
+      body.innerHTML=mine.map(function(c){
+        var stLab=c.status==='frozen'?'Frozen':(c.restriction?'Restricted':'Active');
+        var stCol=c.status==='frozen'?'#b91c1c':(c.restriction?'#6d28d9':'#057a55');
+        return '<tr><td><strong>'+(c.accountNumber||'')+'</strong><div style="font-size:11px;color:#6b7280;font-family:monospace">'+(c.routingNumber||'')+'</div></td>'+
+          '<td>'+(c.name||'')+'<div style="font-size:11px;color:#6b7280">@'+(c.username||'')+'</div></td>'+
+          '<td style="font-weight:700;color:#057a55">'+money(c.balance)+'</td>'+
+          '<td style="font-weight:600;color:'+stCol+'">'+stLab+'</td>'+
+          '<td style="white-space:nowrap">'+
+            '<button type="button" class="ag-sm ag-ok" data-fund="'+c.id+'">Fund</button> '+
+            '<button type="button" class="ag-sm ag-muted" data-freeze="'+c.id+'">'+(c.status==='frozen'?'Unfreeze':'Freeze')+'</button> '+
+            '<button type="button" class="ag-sm ag-muted" data-restrict="'+c.id+'">'+(c.restriction?'Unrestrict':'Restrict')+'</button>'+
+          '</td></tr>';
+      }).join('');
+      body.querySelectorAll('[data-fund]').forEach(function(btn){
+        btn.onclick=function(){ fundCustomer(btn.getAttribute('data-fund')); };
+      });
+      body.querySelectorAll('[data-freeze]').forEach(function(btn){
+        btn.onclick=function(){ toggleCustomerFlag(btn.getAttribute('data-freeze'), 'freeze'); };
+      });
+      body.querySelectorAll('[data-restrict]').forEach(function(btn){
+        btn.onclick=function(){ toggleCustomerFlag(btn.getAttribute('data-restrict'), 'restrict'); };
+      });
+    }
+    // Mail: only this agent's customers
+    var mailTo=$('agMailTo');
+    if(mailTo){
+      mailTo.innerHTML='<option value="">Select…</option>'+mine.map(function(c){
+        return '<option value="'+c.id+'">'+(c.name||'')+' ('+(c.accountNumber||'')+')</option>';
+      }).join('');
+    }
+    renderAgentMail(data, live, mine);
+
+var panel=$('agCreatePanel');
+    if(live.status==='suspended'||live.restriction){
+      panel.style.opacity='0.55'; panel.style.pointerEvents='none';
+    } else {
+      panel.style.opacity='1'; panel.style.pointerEvents='';
+    }
+    if(mine.length>=lim){
+      $('agCreateTitle').innerHTML='Create customer <span class="ag-warn">(limit reached — ask Master Admin to raise limit)</span>';
+    } else {
+      $('agCreateTitle').innerHTML='Create customer <span style="font-weight:500;font-size:.8rem;color:#6b7280">(uses 1 slot)</span>';
+    }
+  }
+
+  async function doLogin(){
+    var u=($('agLoginUser').value||'').trim().toLowerCase();
+    var p=$('agLoginPass').value||'';
+    var err=$('agLoginErr'); err.style.display='none';
+    if(!u||!p){ err.textContent='Enter username and password'; err.style.display='block'; return; }
+    $('agLoginBtn').disabled=true;
+    try{
+      var data=await loadBin();
+      var found=(data.agents||[]).find(function(a){ return (a.username||'').toLowerCase()===u && a.password===p; });
+      if(!found){ err.textContent='Invalid credentials'; err.style.display='block'; return; }
+      if(found.status==='suspended'){ err.textContent='This agent account is suspended'; err.style.display='block'; return; }
+      setAgent(found); showDash(true); render(data, found);
+      toast('Welcome, '+found.name);
+    }catch(e){
+      console.error(e); err.textContent='Could not reach bank servers'; err.style.display='block';
+    }finally{ $('agLoginBtn').disabled=false; }
+  }
+
+  function logout(){
+    clearAgent(); showDash(false); $('agLoginPass').value='';
+  }
+
+  async function refresh(){
+    var me=getAgent(); if(!me) return;
+    try{
+      var data=await loadBin();
+      var live=(data.agents||[]).find(function(a){return a.id===me.id;});
+      if(!live){ toast('Agent profile missing', false); logout(); return; }
+      if(live.status==='suspended'){ toast('Your agent account was suspended', false); logout(); return; }
+      render(data, live); toast('Refreshed');
+    }catch(e){ toast('Refresh failed', false); }
+  }
+
+  async function createCustomer(){
+    var me=getAgent(); if(!me) return;
+    var err=$('agcErr'); err.style.display='none';
+    var name=($('agcName').value||'').trim();
+    var email=($('agcEmail').value||'').trim();
+    var phone=($('agcPhone').value||'').trim();
+    var username=($('agcUser').value||'').trim().toLowerCase();
+    var password=$('agcPass').value||'';
+    var fund=parseFloat($('agcFund').value)||0;
+    if(!name||!email||!username||!password){ err.textContent='Fill required fields'; err.style.display='block'; return; }
+    try{
+      var data=await loadBin();
+      var live=(data.agents||[]).find(function(a){return a.id===me.id;});
+      if(!live){ err.textContent='Agent not found'; err.style.display='block'; return; }
+      if(live.status==='suspended'){ err.textContent='Account suspended'; err.style.display='block'; return; }
+      if(live.restriction){ err.textContent='Account restricted — cannot create customers'; err.style.display='block'; return; }
+      var lim=live.customerLimit||3;
+      var mine=(data.customers||[]).filter(function(c){return c.createdBy===live.id;});
+      if(mine.length>=lim){ err.textContent='Customer limit reached ('+lim+'). Ask Master Admin to expand.'; err.style.display='block'; return; }
+      if((data.customers||[]).some(function(c){return (c.username||'').toLowerCase()===username;}) ||
+         (data.agents||[]).some(function(a){return (a.username||'').toLowerCase()===username;})){
+        err.textContent='Username taken'; err.style.display='block'; return;
+      }
+      if(fund>0 && live.balance<fund){ err.textContent='Insufficient agent float. Balance: '+money(live.balance); err.style.display='block'; return; }
+      var now=new Date().toISOString();
+      var c={
+        id:gid('c'), accountNumber:gacc(), routingNumber:groute(),
+        name:name, email:email, phone:phone, address:'',
+        balance:Math.round(fund*100)/100, status:'active', restriction:null,
+        joined:now.slice(0,10), username:username, password:password, txPin:'2468',
+        createdBy:live.id
+      };
+      data.customers=data.customers||[];
+      data.customers.push(c);
+      data.transactions=data.transactions||[];
+      if(fund>0){
+        live.balance=Math.round((live.balance-fund)*100)/100;
+        data.transactions.unshift({
+          id:gid('t'), customerId:live.id, accountNumber:'AGENT', customerName:live.name,
+          type:'debit', amount:fund, balanceAfter:live.balance,
+          note:'Agent funded customer '+c.accountNumber, status:'completed', timestamp:now, meta:'agent_to_customer'
+        });
+        data.transactions.unshift({
+          id:gid('t'), customerId:c.id, accountNumber:c.accountNumber, customerName:c.name,
+          type:'credit', amount:fund, balanceAfter:c.balance,
+          note:'Initial funding by agent '+live.name, status:'completed', timestamp:now
+        });
+      }
+      await saveBin(data);
+      $('agcName').value=''; $('agcEmail').value=''; $('agcPhone').value='';
+      $('agcUser').value=''; $('agcUser').dataset.touched=''; $('agcPass').value=''; $('agcFund').value='0';
+      toast('Customer created · '+c.accountNumber+(fund>0?' · funded '+money(fund):''));
+      render(data, live);
+    }catch(e){
+      console.error(e); err.textContent='Could not create customer'; err.style.display='block';
+    }
+  }
+
+  async function fundCustomer(custId){
+    var me=getAgent(); if(!me) return;
+    var amtStr=prompt('Amount to fund from your agent float ($):');
+    if(amtStr==null) return;
+    var amt=parseFloat(amtStr);
+    if(!amt||amt<=0){ toast('Invalid amount', false); return; }
+    try{
+      var data=await loadBin();
+      var live=(data.agents||[]).find(function(a){return a.id===me.id;});
+      var cust=(data.customers||[]).find(function(c){return c.id===custId;});
+      if(!live||!cust){ toast('Not found', false); return; }
+      if(cust.createdBy!==live.id){ toast('You can only fund customers you created', false); return; }
+      if(live.status==='suspended'||live.restriction){ toast('Your agent account cannot fund right now', false); return; }
+      if(cust.status==='frozen'){ toast('Customer account is frozen', false); return; }
+      if(live.balance<amt){ toast('Insufficient float. Balance: '+money(live.balance), false); return; }
+      var now=new Date().toISOString();
+      live.balance=Math.round((live.balance-amt)*100)/100;
+      cust.balance=Math.round((cust.balance+amt)*100)/100;
+      data.transactions=data.transactions||[];
+      data.transactions.unshift({
+        id:gid('t'), customerId:live.id, accountNumber:'AGENT', customerName:live.name,
+        type:'debit', amount:amt, balanceAfter:live.balance,
+        note:'Agent funded '+cust.accountNumber, status:'completed', timestamp:now, meta:'agent_to_customer'
+      });
+      data.transactions.unshift({
+        id:gid('t'), customerId:cust.id, accountNumber:cust.accountNumber, customerName:cust.name,
+        type:'credit', amount:amt, balanceAfter:cust.balance,
+        note:'Funded by agent '+live.name, status:'completed', timestamp:now
+      });
+      await saveBin(data);
+      toast('Funded '+money(amt)+' to '+cust.name);
+      render(data, live);
+    }catch(e){ console.error(e); toast('Funding failed', false); }
+  }
+
+
+  async function toggleCustomerFlag(custId, kind){
+    var me=getAgent(); if(!me) return;
+    try{
+      var data=await loadBin();
+      var live=(data.agents||[]).find(function(a){return a.id===me.id;});
+      var cust=(data.customers||[]).find(function(c){return c.id===custId;});
+      if(!live||!cust){ toast('Not found', false); return; }
+      if(cust.createdBy!==live.id){ toast('You can only manage your own customers', false); return; }
+      if(live.status==='suspended'||live.restriction){ toast('Your agent account cannot do that right now', false); return; }
+      if(kind==='freeze'){
+        cust.status=cust.status==='frozen'?'active':'frozen';
+        toast(cust.name+' is now '+cust.status);
+      } else {
+        cust.restriction=cust.restriction?null:'security';
+        toast(cust.restriction?'Restricted '+cust.name:'Unrestricted '+cust.name);
+      }
+      await saveBin(data);
+      render(data, live);
+    }catch(e){ console.error(e); toast('Action failed', false); }
+  }
+
+  function renderAgentMail(data, live, mine){
+    var el=$('agMailList'); if(!el) return;
+    var ids={}; mine.forEach(function(c){ ids[c.id]=true; });
+    var msgs=(data.messages||[]).filter(function(m){
+      // Agent sees mail involving their customers only
+      var fromMine=(m.fromType==='customer'&&ids[m.fromId])||(m.fromType==='agent'&&m.fromId===live.id);
+      var toMine=(m.toType==='customer'&&ids[m.toId])||(m.toType==='agent'&&m.toId===live.id);
+      return fromMine||toMine;
+    }).sort(function(a,b){ return new Date(b.timestamp)-new Date(a.timestamp); });
+    if(!msgs.length){
+      el.innerHTML='<div style="color:#9ca3af;text-align:center;padding:12px">No messages with your customers yet</div>';
+      return;
+    }
+    el.innerHTML=msgs.map(function(m){
+      var who=m.fromType==='agent'?'You → '+(m.toName||''):(m.fromName||'Customer')+' → '+(m.toType==='agent'?'You':(m.toName||''));
+      var when='';
+      try{ when=new Date(m.timestamp).toLocaleString(); }catch(e){}
+      return '<div style="padding:10px 0;border-bottom:1px solid #f3f4f6">'+
+        '<div style="font-weight:700">'+(m.subject||'(No subject)').replace(/</g,'&lt;')+'</div>'+
+        '<div style="font-size:12px;color:#6b7280;margin:2px 0">'+who+' · '+when+'</div>'+
+        '<div style="color:#374151;white-space:pre-wrap">'+(m.body||'').replace(/</g,'&lt;')+'</div></div>';
+    }).join('');
+  }
+
+  async function sendAgentMail(){
+    var me=getAgent(); if(!me) return;
+    var err=$('agMailErr'); err.style.display='none';
+    var toId=$('agMailTo').value;
+    var subj=($('agMailSubj').value||'').trim();
+    var body=($('agMailBody').value||'').trim();
+    if(!toId||!body){ err.textContent='Select a customer and write a message'; err.style.display='block'; return; }
+    try{
+      var data=await loadBin();
+      var live=(data.agents||[]).find(function(a){return a.id===me.id;});
+      var cust=(data.customers||[]).find(function(c){return c.id===toId;});
+      if(!live||!cust||cust.createdBy!==live.id){ err.textContent='Customer not under your portfolio'; err.style.display='block'; return; }
+      data.messages=data.messages||[];
+      data.messages.unshift({
+        id:gid('m'),
+        fromType:'agent', fromId:live.id, fromName:live.name,
+        toType:'customer', toId:cust.id, toName:cust.name, toAccount:cust.accountNumber,
+        agentId:live.id, agentName:live.name,
+        subject:subj||'Message from your agent',
+        body:body, timestamp:new Date().toISOString(), read:false
+      });
+      await saveBin(data);
+      $('agMailSubj').value=''; $('agMailBody').value='';
+      toast('Message sent to '+cust.name);
+      render(data, live);
+    }catch(e){ console.error(e); err.textContent='Send failed'; err.style.display='block'; }
+  }
+
+  // Events
+  $('agLoginForm').onsubmit=function(e){ e.preventDefault(); doLogin(); };
+  $('btnMailSend').onclick=sendAgentMail;
+
+  $('btnLogout').onclick=logout;
+  $('btnRefresh').onclick=refresh;
+  $('btnCreate').onclick=createCustomer;
+
+  $('agcName').addEventListener('input', function(){
+    var v=(this.value||'').trim().toLowerCase().split(/\s+/);
+    if(v.length>=2 && !$('agcUser').dataset.touched){
+      $('agcUser').value=v[0]+'.'+v[v.length-1];
+    }
+    if(!$('agcPass').value) $('agcPass').value=gpwd();
+  });
+  $('agcUser').addEventListener('input', function(){ this.dataset.touched='1'; });
+
+  // Resume session
+  var me=getAgent();
+  if(me){
+    showDash(true);
+    loadBin().then(function(data){ render(data, me); }).catch(function(){});
+  }
+})();
+</script>
+</body>
+</html>
